@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+#The eye_recording.flv video is available at https://youtu.be/kbdbZFT9NQI
 cap = cv2.VideoCapture("C:/Users/VSalinas/Downloads/eye_motion_tracking/eye_recording.flv")
 
 while True:
@@ -34,6 +35,3 @@ while True:
         break
 
 cv2.destroyAllWindows()
-
-#Link to the youtube video I followed 
-# https://youtu.be/kbdbZFT9NQI
