@@ -1,13 +1,15 @@
 import cv2
 import numpy as np
 
-#The eye_recording.flv video is available at https://youtu.be/kbdbZFT9NQI
+#The eye_recording.flv video is available at https://youtu.be/kbdbZFT9NQI in the description 
+#A step by step walkthrough is available here https://pysource.com/2019/01/04/eye-motion-tracking-opencv-with-python/
+
 cap = cv2.VideoCapture("C:/Users/VSalinas/Downloads/eye_motion_tracking/eye_recording.flv")
 
 while True:
     ret, frame = cap.read()
     if ret is False:
-        break
+        break 
 
     roi = frame[269: 795, 537: 1416]
     rows, cols, _ = roi.shape
