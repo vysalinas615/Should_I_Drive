@@ -46,7 +46,7 @@ if not eyes_cascade.load(cv.samples.findFile(eyes_cascade_name)):
     print('--(!)Error loading eyes cascade')
     exit(0)
 
-#only need camera_device variable for webcam face/eye tracking
+#only need camera_device variable for webcam face/eye tracking 
 #camera_device = args.camera
 #-- 2. Read the video stream
 #cap = cv.VideoCapture(camera_device)
