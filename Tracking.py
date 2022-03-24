@@ -59,7 +59,7 @@ if not eyes_cascade.load(cv2.samples.findFile(eyes_cascade_name)):
 
 # testing our video capture here (face and eye tracking is working, but it's reading the frames too slowly
 # even with a 5-millisecond delay between frames -- try to mutli-thread it later)
-cap = cv2.VideoCapture("C:/Users/VSalinas/Downloads/10_e0.mp4")
+cap = cv2.VideoCapture("C:/Users/VSalinas/Downloads/44_e0.mp4")
 
 # throws error if the passed in video capture cannot be opened
 if not cap.isOpened:
