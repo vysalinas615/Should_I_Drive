@@ -52,7 +52,11 @@ while cv.waitKey(1) < 0:
         x = (frameWidth * point[0]) / out.shape[3]
         y = (frameHeight * point[1]) / out.shape[2]
         # Add a point if it's confidence is higher than threshold.
+        print((int(x), int(y))  if conf > argMap.threshold else (-1, -1))
+        print(i)
+        # points.append((int(x), int(y)) if conf > argMap.threshold else None)
         points.append((int(x), int(y)) if conf > argMap.threshold else None)
+
 
     for pair in BODY_CONNECTIONS:
         partFrom = pair[0]
