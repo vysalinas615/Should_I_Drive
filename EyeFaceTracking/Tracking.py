@@ -1,12 +1,17 @@
 from __future__ import print_function
-
-import array
-
+from csv import writer
 import cv2
 import argparse
 import numpy as np
-import pandas
-import csv
+
+
+def append_list_as_row(file_name, list_of_elem):
+    # Open file in append mode
+    with open(file_name, 'a+', newline='') as write_obj:
+        # Create a writer object from csv module
+        csv_writer = writer(write_obj)
+        # Add contents of list as last row in the csv file
+        csv_writer.writerow(list_of_elem)
 
 
 def detectAndDisplay(frame):
@@ -43,21 +48,22 @@ def detectAndDisplay(frame):
             noEyesArray = np.array([-1, -1, -1, -1])
             print("\t NO EYES DETECTED:\n\t\t", noEyesArray, "\n")
             # set values to -1 so that the lstm always has a numerical value for each frame
+            append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test.csv", noEyesArray)
 
         else:
             # If eyes returns a ndarray and the # of items is <8 print the array
             if eyes.size > 8:
                 # An array with more than 8 items indicates a tracking issue
                 print("INVALID TACKING POINTS \n ")
+                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test.csv", eyes)
+
             else:
                 print("EYES: ", eyes, "\n")
+                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test.csv", eyes)
+
 
         for (x2, y2, w2, h2) in eyes:
             eye_center = (x + x2 + w2 // 2, y + y2 + h2 // 2)
-
-            # TODO:// Figure out how to add the tuples to a csv (and make the region of interest half the screen)
-            # put a line where I can write the data points to a csv
-
             radius = int(round((w2 + h2) * 0.25))
             # Creates yellow circles around the centers of the eyes
             roiTRY = cv2.circle(roiTRY, eye_center, radius, (0, 255, 255), 2)
@@ -100,11 +106,6 @@ if not eyes_cascade.load(cv2.samples.findFile(eyes_cascade_name)):
 # testing our video capture here (face and eye tracking is working, but it's reading the frames too slowly
 cap = cv2.VideoCapture("C:/Users/VSalinas/Downloads/44_e0.mp4")
 
-# TODO// fix loading in csv file later. Currently throws a permission denied error
-# Open and/or load in csv file here
-# pandas.read_csv(r"C:/Users/VSalinas/Documents/cs490");
-# r before the path helps to address any special characters in the csv (such as a newline)
-
 # throws error if the passed in video capture cannot be opened
 if not cap.isOpened:
     print('--(!)Error opening video capture')
@@ -119,9 +120,6 @@ while True:
 
     # passes one frame at a time into the detectAndDisplay function from the passed in video capture
     detectAndDisplay(frame)
-    # try to figure it out how to save the values to a csv - pandas.to_csv('eye_points.csv')
-    # TODO// Add each line to the csv here
-
     # NOTE: 27 is the ASCII value of 'esc' (so think of it as pressing escape)
     # if the escape key is pressed during the video, break (each frame waits 5-milliseconds before the next)
     if cv2.waitKey(1) == 27:
