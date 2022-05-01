@@ -41,7 +41,7 @@ while cv.waitKey(1) < 0:
     assert(len(BODY_PARTS) == out.shape[1])
 
     points = []
-    for i in range(len(BODY_PARTS)):
+    for i in range(len(BODY_PARTS) - 1):
         # Slice heatmap of corresponding body's part.
         heatMap = out[0, i, :, :]
 
@@ -53,7 +53,6 @@ while cv.waitKey(1) < 0:
         y = (frameHeight * point[1]) / out.shape[2]
         # Add a point if it's confidence is higher than threshold.
         print((int(x), int(y))  if conf > argMap.threshold else (-1, -1))
-        print(i)
         # points.append((int(x), int(y)) if conf > argMap.threshold else None)
         points.append((int(x), int(y)) if conf > argMap.threshold else None)
 
@@ -88,3 +87,4 @@ while cv.waitKey(1) < 0:
 
     print ("Num eyes: ", eyes)
     print("Num wrists: ", wrists)
+
