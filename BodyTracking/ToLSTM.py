@@ -11,6 +11,73 @@ BODY_CONNECTIONS = [["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", 
                     ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
                     ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"]]
 
+def getVideoData(currentVideo):
+    cap = cv.VideoCapture(currentVideo)
+    bodyFrames = [[]]
+
+    while(True):
+        success, image = cap.read()
+
+        if not success:
+            cv.waitKey()
+            break
+
+        bodyFrame = processFrame(image)
+        print(bodyFrame)
+        bodyFrames.append(bodyFrame)
+
+    return bodyFrames
+
+
+    # count = 0
+    # while success:
+    #     # currentFrame = cap.
+    #
+    #     cv.imwrite("frame%d.jpg" % count, image)  # save frame as JPEG file
+    #     cv.im
+    #
+    #     success, image = cap.read()
+    #     getFrameData("frame%d.jpg" % count)
+    #     print(count)
+    #
+    #     # print('Read a new frame: ', success)
+    #     count += 1
+
+def processFrame(frame):
+    argMap = {"img": "abc", "threshold": 0.2, "w": 368, "h": 368}
+
+    net = cv.dnn.readNetFromTensorflow("graph_opt.pb")
+    # cap = cv.VideoCapture(argMap['img'] if argMap['img'] else 0)
+
+    frameWidth = frame.shape[1]
+    frameHeight = frame.shape[0]
+
+    net.setInput(cv.dnn.blobFromImage(frame, 1.0, (argMap['w'], argMap['h']), (127.5, 127.5, 127.5), swapRB=True,
+                                      crop=False))
+    out = net.forward()
+    out = out[:, :19, :, :]
+
+    assert (len(BODY_PARTS) == out.shape[1])
+
+    output = []
+    for i in range(len(BODY_PARTS) - 1):
+
+        heatMap = out[0, i, :, :]
+
+        _, conf, _, point = cv.minMaxLoc(heatMap)
+        x = (frameWidth * point[0]) / out.shape[3]
+        y = (frameHeight * point[1]) / out.shape[2]
+
+        if conf > argMap['threshold']:
+            output.append(int(x))
+            output.append(int(y))
+        else:
+            output.append(-1)
+            output.append(-1)
+    return output
+
+
+
 def getFrameData(currentFrame):
 
     argMap = {"img": currentFrame, "threshold": 0.2, "w": 368, "h": 368}
@@ -29,32 +96,31 @@ def getFrameData(currentFrame):
 
         net.setInput(cv.dnn.blobFromImage(frame, 1.0, (argMap['w'], argMap['h']), (127.5, 127.5, 127.5), swapRB=True, crop=False))
         out = net.forward()
-        out = out[:, :19, :, :]  # MobileNet output [1, 57, -1, -1], we only need the first 19 elements
+        out = out[:, :19, :, :]
 
         assert (len(BODY_PARTS) == out.shape[1])
 
         output = []
         for i in range(len(BODY_PARTS) - 1):
-            # Slice heatmap of corresponding body's part.
+
             heatMap = out[0, i, :, :]
 
-            # Originally, we try to find all the local maximums. To simplify a sample
-            # we just find a global one. However only a single pose at the same time
-            # could be detected this way.
             _, conf, _, point = cv.minMaxLoc(heatMap)
             x = (frameWidth * point[0]) / out.shape[3]
             y = (frameHeight * point[1]) / out.shape[2]
-            # Add a point if it's confidence is higher than threshold.
+
             if conf > argMap['threshold']:
                 output.append(int(x))
                 output.append(int(y))
             else:
                 output.append(-1)
                 output.append(-1)
-
         return output
 
 
-output = getFrameData("s4.jpeg")
-print(output)
+bodyFrames = getVideoData("43_e0.mp4")
+print(bodyFrames)
 
+
+# output = getFrameData("s4.jpeg")
+# print(output)
