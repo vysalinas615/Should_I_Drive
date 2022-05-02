@@ -40,26 +40,36 @@ def detectAndDisplay(frame):
         faceROI = frame_gray[y:y + h, x:x + w] #faceROI = roiTRY[y:y + h, x:x + w]
         # In each face, detect eyes (NOTE: type of eyes is an n-dimensional array)
         eyes = eyes_cascade.detectMultiScale(faceROI)
-        # TODO:// Eye tracking finds 3 eyes sometimes. See if that can be fixed
+        # TODO:// Eye tracking finds 3 eyes sometimes. Fixed it by discarding last 3 values
 
         # NOTE: If eyes are not detected, the type of eyes changes from an ndarray to a tuple
         if type(eyes) == tuple:
             # x1, x2, y1, y2 are filled with -1's if eyes aren't detected so the lstm has values for each frame
-            noEyesArray = np.array([-1, -1, -1, -1])
-            print("\t NO EYES DETECTED:\n\t\t", noEyesArray, "\n")
+            noEyesArray = np.array([[-1, -1, -1, -1], [-1, -1, -1, -1]])
+            print("\t NO EYES DETECTED:", noEyesArray, "\n")
             # set values to -1 so that the lstm always has a numerical value for each frame
-            append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test.csv", noEyesArray)
+            append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test4.csv", noEyesArray)
 
         else:
-            # If eyes returns a ndarray and the # of items is <8 print the array
+            # If eyes returns a nd-array & the # of items is > 8 print the array
             if eyes.size > 8:
                 # An array with more than 8 items indicates a tracking issue
-                print("INVALID TACKING POINTS \n ")
-                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test.csv", eyes)
+                # Discard the last 4 values
+                eyes = np.array([eyes[0], eyes[1]])
+                print("INVALID TACKING POINTS, EYES:", eyes, "\n")
+                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test4.csv", eyes)
 
+            # This checks to see if only one eye was tracked
+            elif eyes.size == 4:
+                # Outputs a 2d array with 4 values in the first array, and 4x -1's in the second
+                eyes = np.array([eyes[0], [-1, -1, -1, -1]])
+                print("** INVALID TACKING POINTS, EYES:", eyes, "\n")
+                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test4.csv", eyes)
+
+            # If the ndarray size is == 8, both eyes tracked properly, append data to csv
             else:
                 print("EYES: ", eyes, "\n")
-                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test.csv", eyes)
+                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test4.csv", eyes)
 
 
         for (x2, y2, w2, h2) in eyes:
