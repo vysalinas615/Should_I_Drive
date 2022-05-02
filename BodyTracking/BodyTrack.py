@@ -1,4 +1,7 @@
+import csv
+
 import cv2 as cv
+import pandas as pd
 
 BODY_PARTS = {"Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
               "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
@@ -68,3 +71,16 @@ def getFrameData(currentFrame):
         return
 
     return processFrame(frame)
+
+def frameToCSV(currentFrame, fileName):
+    frameData = getFrameData(currentFrame)
+
+    dataframe = pd.DataFrame(frameData)
+    dataframe.to_csv(fileName, index=False)
+
+
+def videoToCSV(currentVideo, fileName):
+    frameData = getVideoData(currentVideo)
+
+    dataframe = pd.DataFrame(frameData)
+    dataframe.to_csv(fileName, index=False)
