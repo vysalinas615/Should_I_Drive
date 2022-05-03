@@ -93,9 +93,10 @@ def allVideosToCSV(startDir, outputFile):
 
     for filePath in allVideos:
         print(filePath)
-        videoArray.append(getVideoData(filePath))
+        videoArray.append(getVideoData(startDir + filePath))
 
-    frameData = getVideoData(videoArray)
+    print(videoArray)
+    frameData = videoArray
 
     dataframe = pd.DataFrame(frameData)
     dataframe.to_csv(outputFile, index=False)
