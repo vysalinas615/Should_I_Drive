@@ -1,3 +1,6 @@
+from os import listdir
+from os.path import isfile, join
+
 import BodyTrack
 
 # output = BodyTrack.getFrameData("s4.jpeg")
@@ -5,7 +8,20 @@ import BodyTrack
 
 # bodyFrames = BodyTrack.getVideoData("47_e3.mp4")
 # print(bodyFrames)
+#
+# output = BodyTrack.frameToCSV("s4.jpeg", "frame4.csv")
+#
+# output = BodyTrack.videoToCSV("9_e0.mp4", "video9.csv")
 
-# output = BodyTrack.frameToCSV("s4.jpeg", "data1.csv")
+path = "../mp4files"
 
-output = BodyTrack.videoToCSV("9_e0.mp4", "data1.csv")
+allVideos = [f for f in listdir(path) if isfile(join(path, f))]
+
+dir = "CSVs/"
+
+# filePath = allVideos[0]
+
+# print(filePath)
+
+for filePath in allVideos:
+    BodyTrack.videoToCSV(path + "/" + filePath, "%s%s.csv" % (dir, filePath.rstrip(".mp4")))

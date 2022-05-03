@@ -1,4 +1,5 @@
-import csv
+from os import listdir
+from os.path import isfile, join
 
 import cv2 as cv
 import pandas as pd
@@ -84,3 +85,17 @@ def videoToCSV(currentVideo, fileName):
 
     dataframe = pd.DataFrame(frameData)
     dataframe.to_csv(fileName, index=False)
+
+def allVideosToCSV(startDir, outputFile):
+    videoArray = []
+
+    allVideos = [f for f in listdir(startDir) if isfile(join(startDir, f))]
+
+    for filePath in allVideos:
+        print(filePath)
+        videoArray.append(getVideoData(filePath))
+
+    frameData = getVideoData(videoArray)
+
+    dataframe = pd.DataFrame(frameData)
+    dataframe.to_csv(outputFile, index=False)
