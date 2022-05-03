@@ -13,15 +13,14 @@ import BodyTrack
 #
 # output = BodyTrack.videoToCSV("9_e0.mp4", "video9.csv")
 
-path = "../mp4files"
+BodyTrack.allVideosToCSV("../mp4files", "theBigOne.csv")
 
-allVideos = [f for f in listdir(path) if isfile(join(path, f))]
 
-dir = "CSVs/"
-
-# filePath = allVideos[0]
-
-# print(filePath)
-
-for filePath in allVideos:
-    BodyTrack.videoToCSV(path + "/" + filePath, "%s%s.csv" % (dir, filePath.rstrip(".mp4")))
+# path = "../mp4files"
+#
+# allVideos = [f for f in listdir(path) if isfile(join(path, f))]
+#
+# dir = "CSVs/"
+#
+# for filePath in allVideos:
+#     BodyTrack.videoToCSV(path + "/" + filePath, "%s%s.csv" % (dir, filePath.rstrip(".mp4")))
