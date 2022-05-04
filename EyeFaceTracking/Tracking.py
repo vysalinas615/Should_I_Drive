@@ -1,8 +1,12 @@
 from __future__ import print_function
 from csv import writer
+from os import listdir
+from os.path import isfile, join
 import cv2
 import argparse
 import numpy as np
+
+# TODO:// Left off at 90_e1
 
 
 def append_list_as_row(file_name, list_of_elem):
@@ -14,18 +18,45 @@ def append_list_as_row(file_name, list_of_elem):
         csv_writer.writerow(list_of_elem)
 
 
+def getVideoData(currentVideo):
+    cap = cv2.VideoCapture(currentVideo)
+    bodyFrames = []
+
+    while(True):
+        success, image = cap.read()
+        if not success:
+            break
+        bodyFrame = processFrame(image) #detectAndDisplay(frame)  # processFrame(image)
+        bodyFrames.append(bodyFrame)
+    return bodyFrames
+
+
+def allVideosToCSV(startDir, outputFile):
+    videoArray = []
+    allVideos = [f for f in listdir(startDir) if isfile(join(startDir, f))]
+
+    for filePath in allVideos:
+        print(filePath)
+        videoArray.append(getVideoData(filePath))
+
+    frameData = getVideoData(videoArray)
+    dataframe = pd.DataFrame(frameData)
+    dataframe.to_csv(outputFile, index=False)
+
+
 def detectAndDisplay(frame):
 
     # Changed the algorithm to only use frame_gray as the cropped grayed out version of the video
     # roiTRY is essentially the video with the tracking shapes overlaid (it's also cropped)
 
+    output = []
     # creates a gray version of the video passed in (aka variable named frame)
-    frame_gray = cv2.cvtColor(frame[0: 750, 700: 1300], cv2.COLOR_BGR2GRAY)
+    frame_gray = cv2.cvtColor(frame[0: 750, 500: 1300], cv2.COLOR_BGR2GRAY) #for 44 frame[0: 750, 700: 1300] or [0: 750, 500: 1300]
     # improves contrast of an image pixel by pixel for easier face/eye tracking
     frame_gray = cv2.equalizeHist(frame_gray)
 
     #This gives us the right half of the screen (might have to adjust it depending on the video)
-    roiTRY = frame[0: 750, 700: 1300]
+    roiTRY = frame[0: 750, 500: 1300]
 
     # Detect faces within the webcam footage/ video capture
     faces = face_cascade.detectMultiScale(roiTRY)
@@ -36,7 +67,7 @@ def detectAndDisplay(frame):
         # (B, G, R) controls color shape displayed. Last value (2) controls line thickness
         # Changed shape and shape color around face from circle to rectangle
 
-        frame = cv2.rectangle(frame[0: 750, 700: 1300], (x, y), (x + w, y + h), (255, 255, 0), 2)
+        frame = cv2.rectangle(frame[0: 750, 500: 1300], (x, y), (x + w, y + h), (255, 255, 0), 2) #frame[0: 750, 700: 1300]
         faceROI = frame_gray[y:y + h, x:x + w] #faceROI = roiTRY[y:y + h, x:x + w]
         # In each face, detect eyes (NOTE: type of eyes is an n-dimensional array)
         eyes = eyes_cascade.detectMultiScale(faceROI)
@@ -46,9 +77,9 @@ def detectAndDisplay(frame):
         if type(eyes) == tuple:
             # x1, x2, y1, y2 are filled with -1's if eyes aren't detected so the lstm has values for each frame
             noEyesArray = np.array([[-1, -1, -1, -1], [-1, -1, -1, -1]])
-            print("\t NO EYES DETECTED:", noEyesArray, "\n")
+            #print("\t NO EYES DETECTED:", noEyesArray, "\n")
             # set values to -1 so that the lstm always has a numerical value for each frame
-            append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test4.csv", noEyesArray)
+            append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\90_e1.csv", noEyesArray)
 
         else:
             # If eyes returns a nd-array & the # of items is > 8 print the array
@@ -56,20 +87,20 @@ def detectAndDisplay(frame):
                 # An array with more than 8 items indicates a tracking issue
                 # Discard the last 4 values
                 eyes = np.array([eyes[0], eyes[1]])
-                print("INVALID TACKING POINTS, EYES:", eyes, "\n")
-                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test4.csv", eyes)
+                #print("INVALID TACKING POINTS, EYES:", eyes, "\n")
+                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\90_e1.csv", eyes)
 
             # This checks to see if only one eye was tracked
             elif eyes.size == 4:
                 # Outputs a 2d array with 4 values in the first array, and 4x -1's in the second
                 eyes = np.array([eyes[0], [-1, -1, -1, -1]])
-                print("** INVALID TACKING POINTS, EYES:", eyes, "\n")
-                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test4.csv", eyes)
+                #print("** INVALID TACKING POINTS, EYES:", eyes, "\n")
+                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\90_e1.csv", eyes)
 
             # If the ndarray size is == 8, both eyes tracked properly, append data to csv
             else:
-                print("EYES: ", eyes, "\n")
-                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\Test4.csv", eyes)
+                #print("EYES: ", eyes, "\n")
+                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\90_e1.csv", eyes)
 
 
         for (x2, y2, w2, h2) in eyes:
@@ -114,7 +145,7 @@ if not eyes_cascade.load(cv2.samples.findFile(eyes_cascade_name)):
 # cap = cv.VideoCapture(camera_device)
 
 # testing our video capture here (face and eye tracking is working, but it's reading the frames too slowly
-cap = cv2.VideoCapture("C:/Users/VSalinas/Downloads/44_e0.mp4")
+cap = cv2.VideoCapture("C:/Users/VSalinas/Documents/cs490/mp4s/90_e1.mp4")
 
 # throws error if the passed in video capture cannot be opened
 if not cap.isOpened:
