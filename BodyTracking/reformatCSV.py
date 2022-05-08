@@ -54,5 +54,3 @@ def addBlanks(inputFile, outputFile):
     dataframe = pd.DataFrame(data)
     dataframe.to_csv(outputFile, index=False)
 
-
-addBlanks("AllVideos2.csv", "noBlanks.csv")
