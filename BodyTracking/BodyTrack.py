@@ -15,11 +15,13 @@ BODY_CONNECTIONS = [["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", 
                     ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
                     ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"]]
 
+
 def getVideoData(currentVideo):
     cap = cv.VideoCapture(currentVideo)
     bodyFrames = []
+    bodyFrames.append(currentVideo)
 
-    while(True):
+    while (True):
         success, image = cap.read()
 
         if not success:
@@ -29,6 +31,7 @@ def getVideoData(currentVideo):
         bodyFrames.append(bodyFrame)
 
     return bodyFrames
+
 
 def processFrame(frame):
     net = cv.dnn.readNetFromTensorflow("graph_opt.pb")
@@ -64,7 +67,6 @@ def processFrame(frame):
 
 
 def getFrameData(currentFrame):
-
     cap = cv.VideoCapture(currentFrame if currentFrame else 0)
 
     success, frame = cap.read()
@@ -72,6 +74,7 @@ def getFrameData(currentFrame):
         return
 
     return processFrame(frame)
+
 
 def frameToCSV(currentFrame, fileName):
     frameData = getFrameData(currentFrame)
@@ -86,14 +89,18 @@ def videoToCSV(currentVideo, fileName):
     dataframe = pd.DataFrame(frameData)
     dataframe.to_csv(fileName, index=False)
 
+
 def allVideosToCSV(startDir, outputFile):
     videoArray = []
 
     allVideos = [f for f in listdir(startDir) if isfile(join(startDir, f))]
 
     for filePath in allVideos:
+
         print(filePath)
+        # videoArray.append(filePath)
         videoArray.append(getVideoData(startDir + filePath))
+
 
     print(videoArray)
     frameData = videoArray

@@ -13,7 +13,7 @@ import BodyTrack
 #
 # output = BodyTrack.videoToCSV("9_e0.mp4", "video9.csv")
 
-BodyTrack.allVideosToCSV("../mp4files/", "AllVideos.csv")
+BodyTrack.allVideosToCSV("../mp4files/", "names2.csv")
 
 
 # path = "../mp4files"
