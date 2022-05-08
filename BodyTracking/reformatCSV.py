@@ -28,4 +28,31 @@ def IndividualToSingle(startDir, outputFile):
     dataframe.to_csv(outputFile, index=False)
 
 
-IndividualToSingle("CSVs/", "AllVideos2ndSet.csv")
+def addBlanks(inputFile, outputFile):
+    data = []
+
+    with open(inputFile) as file_obj:
+        reader_obj = csv.reader(file_obj)
+
+        # Iterate over each row in the csv
+        # file using reader object
+        for row in reader_obj:
+            data.append(row)
+
+    # for row in data:
+    for rowIndex, row in enumerate(data):
+
+        # for col in row:
+        for colIndex, col in enumerate(row):
+
+            if col == "":
+                data[rowIndex][colIndex] = "['-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1']"
+
+
+    # allData.append(singleData)
+    #
+    dataframe = pd.DataFrame(data)
+    dataframe.to_csv(outputFile, index=False)
+
+
+addBlanks("AllVideos2.csv", "noBlanks.csv")
