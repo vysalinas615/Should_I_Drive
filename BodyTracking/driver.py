@@ -2,6 +2,7 @@ from os import listdir
 from os.path import isfile, join
 
 import BodyTrack
+import ReformatCSV
 
 # output = BodyTrack.getFrameData("s4.jpeg")
 # print(output)
@@ -13,7 +14,11 @@ import BodyTrack
 #
 # output = BodyTrack.videoToCSV("9_e0.mp4", "video9.csv")
 
-BodyTrack.allVideosToCSV("../mp4files/", "resized.csv")
+# BodyTrack.allVideosToCSV("../mp4files/", "resized.csv")
+
+# ReformatCSV.addBlanks("resized.csv", "resizedNoBlanks.csv")
+
+ReformatCSV.labelRows("resizedNoBlanks.csv", "resizedLabeledNoBlanks.csv")
 
 
 # path = "../mp4files"
