@@ -23,7 +23,8 @@ parser.add_argument('--h', default=368, type=int, help='Resize height.')
 
 argMap = parser.parse_args()
 net = cv.dnn.readNetFromTensorflow("graph_opt.pb")
-cap = cv.VideoCapture(argMap.img if argMap.img else 0)
+# cap = cv.VideoCapture(argMap.img if argMap.img else 0)
+cap = cv.VideoCapture("203_e2.mp4")
 
 while cv.waitKey(1) < 0:
     hasFrame, frame = cap.read()
