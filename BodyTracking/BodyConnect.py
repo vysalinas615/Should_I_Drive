@@ -86,6 +86,3 @@ while cv.waitKey(1) < 0:
 
     cv.imshow('OpenPose using OpenCV', frame)
 
-    print ("Num eyes: ", eyes)
-    print("Num wrists: ", wrists)
-

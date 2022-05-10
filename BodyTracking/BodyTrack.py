@@ -36,7 +36,7 @@ def getVideoData(currentVideo):
 def processFrame(frame):
     net = cv.dnn.readNetFromTensorflow("graph_opt.pb")
 
-    argMap = {"threshold": 0.2, "w": 368, "h": 368}
+    argMap = {"threshold": 0.2, "w": 320, "h": 180}
 
     frameWidth = frame.shape[1]
     frameHeight = frame.shape[0]
