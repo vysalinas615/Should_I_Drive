@@ -1,31 +1,17 @@
-from os import listdir
-from os.path import isfile, join
+from BodyTracking import BodyConnect
+from BodyTracking import BodyTrack
+from BodyTracking.BigCSVs import ReformatCSV
 
-import BodyTrack
-import ReformatCSV
+BodyConnect.output("203_e2.mp4", 320, 180, 0.2)
 
-# output = BodyTrack.getFrameData("s4.jpeg")
+BodyConnect.outputDefaults("s4.jpeg")
+
+# BodyConnect.output(0, 320, 180, 0.2)
+
+# output = BodyTrack.getFrameData(0)
 # print(output)
 
 # bodyFrames = BodyTrack.getVideoData("47_e3.mp4")
 # print(bodyFrames)
-#
-# output = BodyTrack.frameToCSV("s4.jpeg", "frame4.csv")
-#
-# output = BodyTrack.videoToCSV("9_e0.mp4", "video9.csv")
 
 # BodyTrack.allVideosToCSV("../mp4files/", "resized.csv")
-
-# ReformatCSV.addBlanks("resized.csv", "resizedNoBlanks.csv")
-
-ReformatCSV.labelRows("resizedNoBlanks.csv", "resizedLabeledNoBlanks.csv")
-
-
-# path = "../mp4files"
-#
-# allVideos = [f for f in listdir(path) if isfile(join(path, f))]
-#
-# dir = "CSVs/"
-#
-# for filePath in allVideos:
-#     BodyTrack.videoToCSV(path + "/" + filePath, "%s%s.csv" % (dir, filePath.rstrip(".mp4")))

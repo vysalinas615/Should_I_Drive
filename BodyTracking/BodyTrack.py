@@ -98,7 +98,6 @@ def allVideosToCSV(startDir, outputFile):
     for filePath in allVideos:
 
         print(filePath)
-        # videoArray.append(filePath)
         videoArray.append(getVideoData(startDir + filePath))
 
 
