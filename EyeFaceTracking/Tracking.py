@@ -1,14 +1,11 @@
 from __future__ import print_function
 from csv import writer
-from os import listdir
-from os.path import isfile, join
 import cv2
 import argparse
 import numpy as np
 
-# TODO:// Left off at 90_e1
 
-
+# Appends list_of_elem as a row within a (csv) file
 def append_list_as_row(file_name, list_of_elem):
     # Open file in append mode
     with open(file_name, 'a+', newline='') as write_obj:
@@ -18,110 +15,94 @@ def append_list_as_row(file_name, list_of_elem):
         csv_writer.writerow(list_of_elem)
 
 
-def getVideoData(currentVideo):
-    cap = cv2.VideoCapture(currentVideo)
-    bodyFrames = []
-
-    while(True):
-        success, image = cap.read()
-        if not success:
-            break
-        bodyFrame = processFrame(image) #detectAndDisplay(frame)  # processFrame(image)
-        bodyFrames.append(bodyFrame)
-    return bodyFrames
+# Appends a single frame's location_points array(s) to the output_list
+def append_locations(output_list, location_points):
+    # If the size of output is less than 8, append the item
+    if np.size(output_list) < 8:
+        output_list.append(location_points)
+        print("EYE LOCATIONS: ", output_list, "\n")
 
 
-def allVideosToCSV(startDir, outputFile):
-    videoArray = []
-    allVideos = [f for f in listdir(startDir) if isfile(join(startDir, f))]
-
-    for filePath in allVideos:
-        print(filePath)
-        videoArray.append(getVideoData(filePath))
-
-    frameData = getVideoData(videoArray)
-    dataframe = pd.DataFrame(frameData)
-    dataframe.to_csv(outputFile, index=False)
+# NOTE: If eyes are not detected, the type of eyes changes from ndarray to a tuple
+def is_tuple(location_points):
+    if type(location_points) == tuple:
+        return True
+    return False
 
 
-def detectAndDisplay(frame):
+def detect_and_display(frame):
+    # TODO: Set frame = frame[0: 750, 500: 1300] to isolate right half of the screen if driver has passengers
 
-    # Changed the algorithm to only use frame_gray as the cropped grayed out version of the video
-    # roiTRY is essentially the video with the tracking shapes overlaid (it's also cropped)
-
+    # The array to contain tracking values for the left/right eyes for a single frame
     output = []
+    default_array = np.array([[-1, -1, -1, -1], [-1, -1, -1, -1]])
+    
     # creates a gray version of the video passed in (aka variable named frame)
-    frame_gray = cv2.cvtColor(frame[0: 750, 500: 1300], cv2.COLOR_BGR2GRAY) #for 44 frame[0: 750, 700: 1300] or [0: 750, 500: 1300]
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # improves contrast of an image pixel by pixel for easier face/eye tracking
     frame_gray = cv2.equalizeHist(frame_gray)
-
-    #This gives us the right half of the screen (might have to adjust it depending on the video)
-    roiTRY = frame[0: 750, 500: 1300]
+    # roiTRY - video frame which will have tracking shapes overlaid (cropped if frame was set to [0: 750, 500: 1300])
+    roiTRY = frame
 
     # Detect faces within the webcam footage/ video capture
     faces = face_cascade.detectMultiScale(roiTRY)
-    # Prints arrays with 4 values (looks to be a multi-dimensional array)
 
     for (x, y, w, h) in faces:
         center = (x + w // 2, y + h // 2)
         # (B, G, R) controls color shape displayed. Last value (2) controls line thickness
-        # Changed shape and shape color around face from circle to rectangle
-
-        frame = cv2.rectangle(frame[0: 750, 500: 1300], (x, y), (x + w, y + h), (255, 255, 0), 2) #frame[0: 750, 700: 1300]
-        faceROI = frame_gray[y:y + h, x:x + w] #faceROI = roiTRY[y:y + h, x:x + w]
+        frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 0), 2)
+        faceROI = frame_gray[y:y + h, x:x + w]
         # In each face, detect eyes (NOTE: type of eyes is an n-dimensional array)
         eyes = eyes_cascade.detectMultiScale(faceROI)
-        # TODO:// Eye tracking finds 3 eyes sometimes. Fixed it by discarding last 3 values
 
-        # NOTE: If eyes are not detected, the type of eyes changes from an ndarray to a tuple
-        if type(eyes) == tuple:
-            # x1, x2, y1, y2 are filled with -1's if eyes aren't detected so the lstm has values for each frame
-            noEyesArray = np.array([[-1, -1, -1, -1], [-1, -1, -1, -1]])
-            #print("\t NO EYES DETECTED:", noEyesArray, "\n")
-            # set values to -1 so that the lstm always has a numerical value for each frame
-            append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\90_e1.csv", noEyesArray)
-
-        else:
-            # If eyes returns a nd-array & the # of items is > 8 print the array
-            if eyes.size > 8:
-                # An array with more than 8 items indicates a tracking issue
-                # Discard the last 4 values
-                eyes = np.array([eyes[0], eyes[1]])
-                #print("INVALID TACKING POINTS, EYES:", eyes, "\n")
-                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\90_e1.csv", eyes)
-
-            # This checks to see if only one eye was tracked
-            elif eyes.size == 4:
-                # Outputs a 2d array with 4 values in the first array, and 4x -1's in the second
-                eyes = np.array([eyes[0], [-1, -1, -1, -1]])
-                #print("** INVALID TACKING POINTS, EYES:", eyes, "\n")
-                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\90_e1.csv", eyes)
-
-            # If the ndarray size is == 8, both eyes tracked properly, append data to csv
-            else:
-                #print("EYES: ", eyes, "\n")
-                append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\90_e1.csv", eyes)
-
-
+        # NOTE: Eye tracking finds 3 eyes sometimes. Temporarily 'fixed it' by discarding last 4 values
         for (x2, y2, w2, h2) in eyes:
             eye_center = (x + x2 + w2 // 2, y + y2 + h2 // 2)
             radius = int(round((w2 + h2) * 0.25))
             # Creates yellow circles around the centers of the eyes
             roiTRY = cv2.circle(roiTRY, eye_center, radius, (0, 255, 255), 2)
-    # this will display our video with the eye/face detection shapes
-    cv2.imshow('Capture - Face detection', roiTRY)
+
+        # This will display our video with the eye/face detection shapes
+        cv2.imshow('Capture - Face detection', roiTRY)
+
+        # NOTE: If eyes are not detected, the type of eyes changes from an ndarray to a tuple
+        if is_tuple(faces) | is_tuple(eyes):
+            # if no faces are detected, append a 2D array of -1's
+            append_locations(output, default_array.tolist())
+
+        else:
+            # If eyes returns a nd-array & the # of items is > 8, append values to output list
+            # An array with more than 8 items indicates a tracking issue
+            if eyes.size > 8:
+                eyes = np.array([eyes[0], eyes[1]])
+                # Discards the last 4 values (only appends the first 8 values.)
+                append_locations(output, eyes.tolist())
+
+            # Checks to see if only one eye was tracked
+            elif eyes.size == 4:
+                # Outputs a 2d array with 4 values in the first array, and 4x -1's in the second
+                eyes = np.array([eyes[0], [-1, -1, -1, -1]])
+                append_locations(output, eyes.tolist())
+
+            # If the ndarray size is == 8, both eyes tracked properly, append data to output list
+            else:
+                append_locations(output, eyes.tolist())
+
+    # Appends default_array if the output list is empty for a given frame (aka no eyes/faces tracked)
+    if np.size(output) == 0:
+        append_locations(output, default_array.tolist())
+
+    return output
 
 
+videoOutput = []
 parser = argparse.ArgumentParser(description='Code for eye/face tracking.')
-
-# NOTE: if you want to run this on your local machine you'll need to clone this git repo with the haarcascades first
+# TODO: if you want to run this on your local machine you'll need to clone this git repo with the haarcascades first
+# TODO: Link to repo - https://github.com/opencv/opencv.git
 parser.add_argument('--face_cascade', help='Path to face cascade.',
                     default='C:/Users/VSalinas/Documents/cs490/opencv/data/haarcascades/haarcascade_frontalface_alt.xml')
 parser.add_argument('--eyes_cascade', help='Path to eyes cascade.',
                     default='C:/Users/VSalinas/Documents/cs490/opencv/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml')
-
-# uncomment the line below, remove passed in mp4's before using the code to run in realtime on a webcam
-# parser.add_argument('--camera', help='Camera divide number.', type=int, default=0)
 
 args = parser.parse_args()
 face_cascade_name = args.face_cascade
@@ -139,13 +120,8 @@ if not eyes_cascade.load(cv2.samples.findFile(eyes_cascade_name)):
     print('--(!)Error loading eyes cascade')
     exit(0)
 
-# only need camera_device variable for webcam face/eye tracking
-# camera_device = args.camera
-# Read the video stream using the line below
-# cap = cv.VideoCapture(camera_device)
-
-# testing our video capture here (face and eye tracking is working, but it's reading the frames too slowly
-cap = cv2.VideoCapture("C:/Users/VSalinas/Documents/cs490/mp4s/90_e1.mp4")
+# TODO: Enter the path to your video file here.
+cap = cv2.VideoCapture("C:/Users/VSalinas/Downloads/203_e2.mp4")
 
 # throws error if the passed in video capture cannot be opened
 if not cap.isOpened:
@@ -157,11 +133,16 @@ while True:
     ret, frame = cap.read()
     if frame is None:
         print('--(!) No captured frame found, end program.')
+        # TODO: Enter a file path where the csv file is to be stored, and name it below
+        append_list_as_row(r"C:\Users\VSalinas\Documents\cs490\dataRedo.csv", videoOutput)
         break
 
-    # passes one frame at a time into the detectAndDisplay function from the passed in video capture
-    detectAndDisplay(frame)
-    # NOTE: 27 is the ASCII value of 'esc' (so think of it as pressing escape)
-    # if the escape key is pressed during the video, break (each frame waits 5-milliseconds before the next)
+    # Passes a single frame into the detectAndDisplay function from the passed in video capture
+    output = detect_and_display(frame)
+    # Appends tracking locations from every frame into the videoOutput array
+    videoOutput.append(output)
+
+    # NOTE: 27 is the ASCII value of 'esc'
+    # If the escape key is pressed during the video, break (each frame waits 1-millisecond before the next)
     if cv2.waitKey(1) == 27:
         break
